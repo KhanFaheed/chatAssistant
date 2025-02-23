@@ -23,14 +23,23 @@ def get_context_retriever_chain(vectordb):
     llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.2, convert_system_message_to_human=True)
     retriever = vectordb.as_retriever()
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are a chatbot. You'll receive a prompt that includes a chat history and retrieved content from the vectorDB based on the user's question. Your task is to respond to the user's question using the information from the vectordb, relying as little as possible on your own knowledge. If for some reason you don't know the answer for the question, or the question cannot be answered because there's no context, ask the user for more details. Do not invent an answer. Answer the questions from this context: {context}"),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("human", "{input}")
-    ])
+    ("system", """You are a multilingual chatbot powered by a Retrieval-Augmented Generation (RAG) system. Your task is to answer the user's question using ONLY the context provided from the vector database. Follow these rules:
+
+1. **Language Detection**: Respond in the same language as the user's input. If the input is in Arabic, respond in Arabic. If the input is in English, respond in English.
+2. **Contextual Answers**: Use ONLY the information from the provided context to answer the question. Do not rely on your own knowledge or invent answers.
+3. **Unanswerable Questions**: If the context does not contain enough information to answer the question, politely ask the user for more details or clarification.
+4. **Ambiguity**: If the question is ambiguous or unclear, ask the user to rephrase or provide more context.
+
+Here is the context from the vector database:
+{context}"""),
+    MessagesPlaceholder(variable_name="chat_history"),
+    ("human", "{input}")
+])
     # Create chain for generating responses and a retrieval chain
     chain = create_stuff_documents_chain(llm=llm, prompt=prompt)
     retrieval_chain = create_retrieval_chain(retriever, chain)
     return retrieval_chain
+   
 
 def get_response(question, chat_history, vectordb):
     """

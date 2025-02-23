@@ -26,8 +26,8 @@ class ChatApp:
             os.makedirs("docs")
 
         # Configurations and session state initialization
-        st.set_page_config(page_title="Chat with PDFS :books:")
-        st.title("Chat with PDFS :books:")
+        st.set_page_config(page_title="TenhalBot")
+        st.title("TenhalBot:")
         initialize_session_state_variables(st)
         self.docs_files = st.session_state.processed_documents
 
